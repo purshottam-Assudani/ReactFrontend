@@ -1,23 +1,32 @@
 version: 0.2
 
+env:
+  variables:
+    REPOSITORY_URI: docker.io/anujsharma1990/frontend
+    CONTAINER_NAME: frontend-container
+    IMAGE_TAG: latest
+
 phases:
   pre_build:
     commands:
       - echo Logging in to DockerHub...
-      - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-      - REPOSITORY_URI="docker.io/anujsharma1990/frontend"
-      - CONTAINER_NAME="frontend-container"
-      - IMAGE_TAG="latest"
+      - echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+
   post_build:
     commands:
       - echo Build completed on `date`
+      - echo Pushing the Docker image...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
+
       - echo Writing image definitions file...
-      - printf '[{"name":"'$CONTAINER_NAME'","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > builddefinition.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinition.json
+
 artifacts:
-    files: builddefinition.json
+  files:
+    - imagedefinition.json
