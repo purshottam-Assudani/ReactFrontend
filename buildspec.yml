@@ -1,31 +1,26 @@
 version: 0.2
 
-env:
-  variables:
-    REPOSITORY_URI: 968176627785.dkr.ecr.us-east-1.amazonaws.com/frontend
-    CONTAINER_NAME: frontend-container
-    IMAGE_TAG: latest
-
 phases:
   pre_build:
     commands:
-      - echo Logging in to DockerHub...
-      - echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+      - echo Logging in to Amazon ECR...
+      - AWS_ACCOUNT_ID=968176627785
+      - AWS_DEFAULT_REGION=us-east-1
+      - REPOSITORY_URI=968176627785.dkr.ecr.us-east-1.amazonaws.com/frontend
+      - IMAGE_TAG=latest
+      - CONTAINER_NAME=frontend-container
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
 
   build:
     commands:
       - echo Build started on `date`
-      - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
 
   post_build:
     commands:
       - echo Build completed on `date`
-      - echo Pushing the Docker image...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-
-      - echo Writing image definitions file...
-      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinition.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' "$CONTAINER_NAME" "$REPOSITORY_URI:$IMAGE_TAG" > imagedefinition.json
 
 artifacts:
   files:
