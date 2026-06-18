@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    REPOSITORY_URI: docker.io/anujsharma1990/frontend
+    REPOSITORY_URI: 968176627785.dkr.ecr.us-east-1.amazonaws.com/frontend
     CONTAINER_NAME: frontend-container
     IMAGE_TAG: latest
 
